@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Sân Bóng Đá</title>
+    <!-- Thư viện Icon FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR ĐIỀU HƯỚNG -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-futbol"></i>
+                <span>PitchManager</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" onclick="switchTab('dashboard', this)">
+                    <i class="fa-solid fa-house"></i> <span>Trang chính</span>
+                </li>
+                <li onclick="switchTab('booking', this)">
+                    <i class="fa-solid fa-calendar-check"></i> <span>Đặt sân</span>
+                </li>
+                <li onclick="switchTab('pitches', this)">
+                    <i class="fa-solid fa-border-all"></i> <span>Danh sách sân bóng</span>
+                </li>
+                <li onclick="switchTab('customers', this)">
+                    <i class="fa-solid fa-users"></i> <span>Quản lý khách hàng</span>
+                </li>
+                <li onclick="switchTab('services', this)">
+                    <i class="fa-solid fa-bottle-water"></i> <span>Dịch vụ</span>
+                </li>
+                <li onclick="switchTab('invoices', this)">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> <span>Hóa đơn</span>
+                </li>
+                <li onclick="switchTab('tournaments', this)">
+                    <i class="fa-solid fa-trophy"></i> <span>Giải đấu (Mở rộng ER)</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- NỘI DUNG CHÍNH -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Tìm kiếm nhanh sân, khách hàng, hóa đơn...">
+                </div>
+                <div class="user-info">
+                    <span class="badge-role">Nhân viên: NV01 - Nguyễn Văn A</span>
+                    <img src="https://ui-avatars.com/api/?name=Nguyen+A&background=10b981&color=fff" alt="Avatar">
+                </div>
+            </header>
+
+            <!-- 1. TAB TRANG CHÍNH & ĐẶT SÂN -->
+            <section id="dashboard" class="tab-content active">
+                <div class="page-header">
+                    <h2>Tổng Quan & Đặt Sân Nhanh</h2>
+                </div>
+
+                <!-- Thống kê nhanh -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h4>Doanh thu hôm nay</h4>
+                            <p class="stat-price">4.500.000 đ</p>
+                        </div>
+                        <i class="fa-solid fa-sack-dollar stat-icon"></i>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h4>Đơn đặt sân (Hôm nay)</h4>
+                            <p>18 đơn</p>
+                        </div>
+                        <i class="fa-solid fa-calendar-day stat-icon"></i>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h4>Sân đang trống</h4>
+                            <p>4 / 6 sân</p>
+                        </div>
+                        <i class="fa-solid fa-check-circle stat-icon"></i>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h4>Khách hàng mới</h4>
+                            <p>5 người</p>
+                        </div>
+                        <i class="fa-solid fa-user-plus stat-icon"></i>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Cột trái: Trạng thái sân & Lịch trình -->
+                    <div class="left-panel">
+                        <div class="card">
+                            <h3>Trạng Thái Sân Bóng Hiện Tại</h3>
+                            <div class="pitch-status-grid" id="pitch-status-container">
+                                <!-- Dữ liệu render từ JS -->
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <h3>Lịch Đặt Sân Trong Ngày (Timeline)</h3>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã Đặt</th>
+                                            <th>Khách Hàng</th>
+                                            <th>Sân Bóng</th>
+                                            <th>Khung Giờ</th>
+                                            <th>Trạng Thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="booking-list-body">
+                                        <!-- Dữ liệu render từ JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải: Form Đặt Sân Mới (Khớp thực thể DAT_SAN & CHITIET_DICHVU) -->
+                    <div class="right-panel">
+                        <div class="card">
+                            <h3><i class="fa-solid fa-pen-to-square"></i> Form Đặt Sân Mới</h3>
+                            <form id="bookingForm" onsubmit="handleBookingSubmit(event)">
+                                <div class="form-group">
+                                    <label>Khách hàng (MaKH) *</label>
+                                    <select id="bookCustomer" required>
+                                        <option value="">-- Chọn khách hàng --</option>
+                                        <option value="KH01 - Anh Nam (0901234567)">KH01 - Anh Nam (0901234567)</option>
+                                        <option value="KH02 - Anh Tuấn (0987654321)">KH02 - Anh Tuấn (0987654321)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Chọn sân (MaSan) *</label>
+                                    <select id="bookPitch" required onchange="calculateEstimatedTotal()">
+                                        <option value="Sân 1A (5 người)" data-price="300000">Sân 1A - Sân 5 (300.000đ/h)</option>
+                                        <option value="Sân 2A (7 người)" data-price="500000">Sân 2A - Sân 7 (500.000đ/h)</option>
+                                        <option value="Sân 3A (11 người)" data-price="1000000">Sân 3A - Sân 11 (1.000.000đ/h)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Giờ bắt đầu *</label>
+                                        <input type="time" id="startTime" value="17:30" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Giờ kết thúc *</label>
+                                        <input type="time" id="endTime" value="19:00" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Dịch vụ đi kèm (CHITIET_DICHVU)</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" class="srv-check" value="100000" onchange="calculateEstimatedTotal()"> Nước suối (1 thùng - 100k)</label>
+                                        <label><input type="checkbox" class="srv-check" value="50000" onchange="calculateEstimatedTotal()"> Thuê áo tập (10 cái - 50k)</label>
+                                        <label><input type="checkbox" class="srv-check" value="200000" onchange="calculateEstimatedTotal()"> Thuê trọng tài (200k)</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tiền cọc trước (VNĐ)</label>
+                                    <input type="number" id="deposit" value="100000">
+                                </div>
+                                <div class="total-preview">
+                                    <span>Tạm tính:</span>
+                                    <strong id="estimatedTotal">300.000 đ</strong>
+                                </div>
+                                <button type="submit" class="btn-primary w-100">Xác Nhận Đặt Sân</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. TAB ĐẶT SÂN CHI TIẾT -->
+            <section id="booking" class="tab-content">
+                <div class="card">
+                    <h2>Quản Lý Phiếu Đặt Sân (Bảng DAT_SAN)</h2>
+                    <p style="color: #64748b; margin-bottom: 15px;">Danh sách toàn bộ lịch đặt sân để kết nối API với Backend (TV3).</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mã Đặt Sân</th>
+                                <th>Khách Hàng</th>
+                                <th>Mã Sân</th>
+                                <th>Thời Gian Bắt Đầu</th>
+                                <th>Thời Gian Kết Thúc</th>
+                                <th>Trạng Thái</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#DS001</td>
+                                <td>KH01 - Anh Nam</td>
+                                <td>Sân 1A (5 người)</td>
+                                <td>2026-10-30 17:30</td>
+                                <td>2026-10-30 19:00</td>
+                                <td><span class="status-badge busy">Đang đá</span></td>
+                                <td><button class="btn-sm" onclick="showToast('Đã chuyển sang tạo Hóa đơn!')">Thanh toán</button></td>
+                            </tr>
+                            <tr>
+                                <td>#DS002</td>
+                                <td>KH02 - Anh Tuấn</td>
+                                <td>Sân 2A (7 người)</td>
+                                <td>2026-10-30 19:00</td>
+                                <td>2026-10-30 20:30</td>
+                                <td><span class="status-badge booked">Đã đặt cọc</span></td>
+                                <td><button class="btn-sm" onclick="showToast('Đã nhận sân!')">Nhận sân</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. TAB DANH SÁCH SÂN BÓNG (SANBONG & LOAISAN) -->
+            <section id="pitches" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Danh Sách Sân Bóng (Bảng SANBONG)</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã Sân</th>
+                                    <th>Tên Sân</th>
+                                    <th>Loại Sân (LOAISAN)</th>
+                                    <th>Giá Thuê / Giờ</th>
+                                    <th>Tình Trạng</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pitch-table-body">
+                                <tr>
+                                    <td>SAN01</td>
+                                    <td>Sân 1A</td>
+                                    <td>Sân 5 người</td>
+                                    <td>300.000 đ</td>
+                                    <td><span class="status-badge free">Đang trống</span></td>
+                                </tr>
+                                <tr>
+                                    <td>SAN02</td>
+                                    <td>Sân 2A</td>
+                                    <td>Sân 7 người</td>
+                                    <td>500.000 đ</td>
+                                    <td><span class="status-badge busy">Đang có khách</span></td>
+                                </tr>
+                                <tr>
+                                    <td>SAN03</td>
+                                    <td>Sân 3A</td>
+                                    <td>Sân 11 người</td>
+                                    <td>1.000.000 đ</td>
+                                    <td><span class="status-badge free">Đang trống</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>Thêm Sân Bóng Mới</h3>
+                        <form onsubmit="handleAddPitch(event)">
+                            <div class="form-group">
+                                <label>Mã Sân (MaSan) *</label>
+                                <input type="text" id="newPitchId" placeholder="VD: SAN04" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tên Sân (TenSan) *</label>
+                                <input type="text" id="newPitchName" placeholder="VD: Sân 4B" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Loại Sân (MaLoai) *</label>
+                                <select id="newPitchType">
+                                    <option value="Sân 5 người">L01 - Sân 5 người</option>
+                                    <option value="Sân 7 người">L02 - Sân 7 người</option>
+                                    <option value="Sân 11 người">L03 - Sân 11 người</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Giá thuê/giờ (GiaThue) *</label>
+                                <input type="number" id="newPitchPrice" placeholder="VD: 300000" required>
+                            </div>
+                            <button type="submit" class="btn-primary w-100">Lưu Sân Bóng</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. TAB QUẢN LÝ KHÁCH HÀNG (KHACHHANG) -->
+            <section id="customers" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Danh Sách Khách Hàng (Bảng KHACHHANG)</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã KH</th>
+                                    <th>Họ Tên</th>
+                                    <th>Số Điện Thoại</th>
+                                    <th>Địa Chỉ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customer-table-body">
+                                <tr>
+                                    <td>KH01</td>
+                                    <td>Nguyễn Văn Nam</td>
+                                    <td>0901234567</td>
+                                    <td>Cầu Giấy, Hà Nội</td>
+                                </tr>
+                                <tr>
+                                    <td>KH02</td>
+                                    <td>Trần Minh Tuấn</td>
+                                    <td>0987654321</td>
+                                    <td>Đống Đa, Hà Nội</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>Thêm Khách Hàng Mới</h3>
+                        <form onsubmit="handleAddCustomer(event)">
+                            <div class="form-group">
+                                <label>Mã KH (MaKH) *</label>
+                                <input type="text" id="custId" placeholder="VD: KH03" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Họ và Tên (HoTen) *</label>
+                                <input type="text" id="custName" placeholder="Nhập họ tên khách" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Số điện thoại (SoDienThoai) *</label>
+                                <input type="tel" id="custPhone" placeholder="Nhập SĐT" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Địa chỉ (DiaChi)</label>
+                                <input type="text" id="custAddress" placeholder="Nhập địa chỉ">
+                            </div>
+                            <button type="submit" class="btn-primary w-100">Thêm Khách Hàng</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. TAB DỊCH VỤ (DICHVU) -->
+            <section id="services" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Danh Mục Dịch Vụ Đi Kèm (Bảng DICHVU)</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã DV</th>
+                                    <th>Tên Dịch Vụ</th>
+                                    <th>Đơn Vị Tính</th>
+                                    <th>Đơn Giá</th>
+                                </tr>
+                            </thead>
+                            <tbody id="service-table-body">
+                                <tr>
+                                    <td>DV01</td>
+                                    <td>Nước khoáng Lavie</td>
+                                    <td>Thùng (24 chai)</td>
+                                    <td>100.000 đ</td>
+                                </tr>
+                                <tr>
+                                    <td>DV02</td>
+                                    <td>Thuê áo tập (Áo мани)</td>
+                                    <td>Bộ (10 áo)</td>
+                                    <td>50.000 đ</td>
+                                </tr>
+                                <tr>
+                                    <td>DV03</td>
+                                    <td>Thuê Trọng tài</td>
+                                    <td>Trận</td>
+                                    <td>200.000 đ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>Thêm Dịch Vụ Mới</h3>
+                        <form onsubmit="handleAddService(event)">
+                            <div class="form-group">
+                                <label>Mã Dịch Vụ (MaDV) *</label>
+                                <input type="text" id="srvId" placeholder="VD: DV04" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tên Dịch Vụ (TenDV) *</label>
+                                <input type="text" id="srvName" placeholder="VD: Nước tăng lực Redbull" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Đơn vị tính (DonViTinh) *</label>
+                                <input type="text" id="srvUnit" placeholder="VD: Lon / Thùng" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Đơn giá (DonGia) *</label>
+                                <input type="number" id="srvPrice" placeholder="VD: 15000" required>
+                            </div>
+                            <button type="submit" class="btn-primary w-100">Lưu Dịch Vụ</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. TAB HÓA ĐƠN (HOADON) -->
+            <section id="invoices" class="tab-content">
+                <div class="card">
+                    <h3>Quản Lý Hóa Đơn Thanh Toán (Bảng HOADON)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mã HĐ (MaHD)</th>
+                                <th>Mã Đặt Sân</th>
+                                <th>Nhân Viên Lập (MaNV)</th>
+                                <th>Ngày Lập</th>
+                                <th>Tổng Tiền</th>
+                                <th>Trạng Thái Thanh Toán</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>HD001</td>
+                                <td>#DS001</td>
+                                <td>NV01 - Nguyễn Văn A</td>
+                                <td>2026-10-30</td>
+                                <td><strong>650.000 đ</strong></td>
+                                <td><span class="status-badge free">Đã thanh toán</span></td>
+                            </tr>
+                            <tr>
+                                <td>HD002</td>
+                                <td>#DS002</td>
+                                <td>NV01 - Nguyễn Văn A</td>
+                                <td>2026-10-30</td>
+                                <td><strong>500.000 đ</strong></td>
+                                <td><span class="status-badge busy">Chưa thanh toán</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 7. TAB GIẢI ĐẤU (GIAIDAU, DOIBONG, TRANDAU - Theo ER) -->
+            <section id="tournaments" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Danh Sách Giải Đấu & Lịch Thi Đấu (GIAIDAU - TRANDAU)</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã Giải</th>
+                                    <th>Tên Giải Đấu</th>
+                                    <th>Trận Đấu (Đội Nhà vs Đội Khách)</th>
+                                    <th>Sân Thi Đấu</th>
+                                    <th>Tỷ Số</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>GD2026</td>
+                                    <td>Giải Mùa Thu 2026</td>
+                                    <td>FC Tia Chớp <strong>vs</strong> FC Bão Táp</td>
+                                    <td>Sân 2A</td>
+                                    <td><span class="status-badge booked">3 - 2</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>Đăng Ký Đội Bóng Tham Gia (DOIBONG)</h3>
+                        <form onsubmit="event.preventDefault(); showToast('Đã đăng ký đội bóng vào giải đấu!'); this.reset();">
+                            <div class="form-group">
+                                <label>Mã Đội (MaDoi) *</label>
+                                <input type="text" placeholder="VD: DB01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tên Đội Bóng (TenDoi) *</label>
+                                <input type="text" placeholder="VD: FC Anh Em" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tên Đội Trưởng (TenDoiTruong) *</label>
+                                <input type="text" placeholder="Nhập tên đội trưởng" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Số Điện Thoại Liên Hệ *</label>
+                                <input type="tel" placeholder="Nhập SĐT" required>
+                            </div>
+                            <button type="submit" class="btn-primary w-100">Đăng Ký Đội</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Thông báo nổi (Toast Notification) -->
+    <div id="toast" class="toast">Thao tác thành công!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
