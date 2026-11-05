@@ -43,5 +43,3 @@ Với database cũ, sao lưu trước, đọc các câu kiểm tra và chỉ ch�
 ## Môi trường kiểm thử
 
 Cấu hình mẫu dùng cổng MySQL `3306`. Các test nghiệp vụ trong repo chỉ chấp nhận database `QuanLySanBong_demo` trên MySQL cục bộ cổng `33307` để tránh chạy nhầm vào dữ liệu đang dùng. Muốn chạy test, cần chuẩn bị MySQL thử nghiệm riêng, nhập schema và dữ liệu mẫu, rồi chỉnh cấu hình local cho đúng môi trường đó. Giữ nguyên các điều kiện bảo vệ trong test.
-
-Báo cáo học phần được nộp riêng.

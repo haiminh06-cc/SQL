@@ -59,5 +59,3 @@ Test tự tạo và dọn dữ liệu của lần chạy. Tránh nhập liệu c
 `tests/db-down.php` là kiểm thử riêng khi mất kết nối database. Nếu cần chạy, tạo thư mục `.tools` trước, chuẩn bị session bằng `php tests/db-down.php http://127.0.0.1:8000 --prepare` khi database còn hoạt động. Sau đó chỉ dừng database thử nghiệm, giữ PHP server chạy và gọi lại lệnh không có `--prepare`. Script không tự dừng database. Không dùng cách này với database đang sử dụng.
 
 Chi tiết SQL và cách nhập dữ liệu: [database/README.md](database/README.md).
-
-Báo cáo học phần được nộp riêng, không kèm trong repo.
